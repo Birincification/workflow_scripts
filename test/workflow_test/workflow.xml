@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<watchdog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="watchdog.xsd" watchdogBase="/home/proj/software/watchdog/">
+	<settings>
+		<constants>
+			<const name="WATCHDOG">/home/proj/software/watchdog</const>
+			<const name="BASE">/mnt/raidproj/proj/software/watchdog/modules/scriptCaller</const>
+			<const name="INPUT_TABLE">${BASE}/test_data/samples.csv</const>
+			
+			<!-- must exist -->
+			<const name="LOGDIR">/mnt/raidtmp/hadziahmetovic/log</const>
+
+			<const name="DOCKER_BIN">/usr/bin/podman</const>
+		</constants>
+		<wrappers>
+			<docker name="docker" path2docker="${DOCKER_BIN}" image="bash:4.4" disableAutodetectMount="true">
+				<blacklist pattern="/tmp/" />
+				<mount><host>${WATCHDOG}/</host></mount>
+				<mount><host>${BASE}/</host></mount>
+				<mount><host>${LOGDIR}/</host></mount>
+			</docker>
+		</wrappers>
+		<executors>
+			<sge name="cluster_low" default="true" maxRunning="8" slots="1" memory="50000M" queue="hpclient.q" />
+			<!-- not working yet with this image (wrong shebang as no /bin/bash in image...) -->
+			<!-- <sge name="cluster_low_podman" default="true" maxRunning="8" slots="1" memory="2048M" queue="hpclient.q" container="docker" shebang="#!/usr/bin/env bash"/> -->	
+		</executors>
+		<processBlock>
+			<processInput name="input_block" />
+			<processTable name="table" table="${INPUT_TABLE}" />
+		</processBlock>
+	</settings>
+	<!-- TODO: modify -->
+	<tasks mail="hadziahmetovic@cip.ifi.lmu.de">
+		<!-- simple test task -->
+		<scriptCallerTask id="1" name="scriptCallerTest" notify="enabled">
+			<parameter>
+				<script>/mnt/raidinput/tmp/hadziahmetovic/test_index.sh</script>
+				<config>${BASE}/test_data/testConfig.csv</config>
+				<param>name1:value1</param>
+				<param>name2:value2.1,value2.2</param>
+				<param>flag7</param>
+				<param>flag8</param>
+			</parameter>
+			<streams>
+				<stdout>${LOGDIR}/scriptCaller.out</stdout>
+				<stderr>${LOGDIR}/scriptCaller.err</stderr>
+			</streams>
+		</scriptCallerTask>
+
+		<!-- task which generates sub-tasks for each entry in samples.csv -->
+		<scriptCallerTask id="2" name="mapping" processBlock="table">
+			<parameter>
+				<script>${BASE}/test_data/testCommand.sh</script>
+				<param>mapWithSTAR</param>
+				<param>id:{$id}</param>
+				<param>sample:{$name}</param>
+				<param>read1:{$read1}</param>
+				<param>read2:{$read2}</param>
+			</parameter>
+			<streams>
+				<stdout>${LOGDIR}/mapping.{$name}.out</stdout>
+				<stderr>${LOGDIR}/mapping.{$name}.err</stderr>
+			</streams>
+		</scriptCallerTask>
+
+		<!-- task which generates sub-tasks for each entry in samples.csv -->
+		<scriptCallerTask id="3" name="convert" processBlock="table">
+			<dependencies>
+				<depends separate="true">2</depends>
+			</dependencies>
+			<parameter>
+				<script>${BASE}/test_data/testCommand.sh</script>
+				<param>convert</param>
+				<param>id:{$id}</param>
+				<param>sample:{$name}</param>
+			</parameter>
+			<streams>
+				<stdout>${LOGDIR}/convert.{$name}.out</stdout>
+				<stderr>${LOGDIR}/convert.{$name}.err</stderr>
+			</streams>
+		</scriptCallerTask>
+
+		<!-- task which generates sub-tasks for each entry in samples.csv -->
+		<scriptCallerTask id="4" name="countAndMerge">
+			<dependencies>
+				<depends>3</depends>
+			</dependencies>
+			<parameter>
+				<script>${BASE}/test_data/testCommand.sh</script>
+				<param>count</param>
+			</parameter>
+			<streams>
+				<stdout>${LOGDIR}/countAndMerge.out</stdout>
+				<stderr>${LOGDIR}/countAndMerge.err</stderr>
+			</streams>
+		</scriptCallerTask>
+	</tasks>
+</watchdog>

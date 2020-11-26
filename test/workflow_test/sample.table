@@ -1,0 +1,7 @@
+label	condition	fw	rw	strandness
+small.sample_01	0	small.sample_01_1.fastq.gz	small.sample_01_2.fastq.gz	true
+small.sample_02	0	small.sample_01_1.fastq.gz	small.sample_01_2.fastq.gz	true
+small.sample_03	0	small.sample_01_1.fastq.gz	small.sample_01_2.fastq.gz	true
+small.sample_01	1	small.sample_01_1.fastq.gz	small.sample_01_2.fastq.gz	true
+small.sample_01	1	small.sample_01_1.fastq.gz	small.sample_01_2.fastq.gz	true
+small.sample_01	1	small.sample_01_1.fastq.gz	small.sample_01_2.fastq.gz	true
