@@ -3,11 +3,12 @@
 	<settings>
 		<constants>
 			<const name="WATCHDOG">/home/proj/software/watchdog</const>
-			<const name="BASE">/mnt/raidproj/proj/software/watchdog/modules/scriptCaller</const>
-			<const name="INPUT_TABLE">${BASE}/test_data/samples.csv</const>
+			<const name="BASE">/home/users/hadziahmetovic/testing/workflow_scripts/test/workflow_test</const>
+			<const name="INPUT_TABLE">${BASE}/sample.table</const>
+			<const name="OUT">${BASE}/OUT</const>
 			
 			<!-- must exist -->
-			<const name="LOGDIR">/mnt/raidtmp/hadziahmetovic/log</const>
+			<const name="LOGDIR">${OUT}/log</const>
 
 			<const name="DOCKER_BIN">/usr/bin/podman</const>
 		</constants>
@@ -32,14 +33,13 @@
 	<!-- TODO: modify -->
 	<tasks mail="hadziahmetovic@cip.ifi.lmu.de">
 		<!-- simple test task -->
-		<scriptCallerTask id="1" name="scriptCallerTest" notify="enabled">
+		<scriptCallerTask id="1" name="generate_indices" notify="enabled">
 			<parameter>
-				<script>/mnt/raidinput/tmp/hadziahmetovic/test_index.sh</script>
-				<config>${BASE}/test_data/testConfig.csv</config>
-				<param>name1:value1</param>
-				<param>name2:value2.1,value2.2</param>
-				<param>flag7</param>
-				<param>flag8</param>
+				<script>${BASE}/config/test_index.sh</script>
+				<config>${BASE}/config/index.config</config>
+				<param>gtf:test.gtf</param>
+				<param>hisat2</param>
+				<param>star</param>
 			</parameter>
 			<streams>
 				<stdout>${LOGDIR}/scriptCaller.out</stdout>
@@ -52,14 +52,14 @@
 			<parameter>
 				<script>${BASE}/test_data/testCommand.sh</script>
 				<param>mapWithSTAR</param>
-				<param>id:{$id}</param>
-				<param>sample:{$name}</param>
-				<param>read1:{$read1}</param>
-				<param>read2:{$read2}</param>
+				<param>label:{$label}</param>
+				<param>sample:{$label}</param>
+				<param>read1:{$fw}</param>
+				<param>read2:{$rw}</param>
 			</parameter>
 			<streams>
-				<stdout>${LOGDIR}/mapping.{$name}.out</stdout>
-				<stderr>${LOGDIR}/mapping.{$name}.err</stderr>
+				<stdout>${LOGDIR}/mapping.{$label}.out</stdout>
+				<stderr>${LOGDIR}/mapping.{$label}.err</stderr>
 			</streams>
 		</scriptCallerTask>
 
@@ -71,12 +71,12 @@
 			<parameter>
 				<script>${BASE}/test_data/testCommand.sh</script>
 				<param>convert</param>
-				<param>id:{$id}</param>
-				<param>sample:{$name}</param>
+				<param>label:{$label}</param>
+				<param>sample:{$label}</param>
 			</parameter>
 			<streams>
-				<stdout>${LOGDIR}/convert.{$name}.out</stdout>
-				<stderr>${LOGDIR}/convert.{$name}.err</stderr>
+				<stdout>${LOGDIR}/convert.{$label}.out</stdout>
+				<stderr>${LOGDIR}/convert.{$label}.err</stderr>
 			</streams>
 		</scriptCallerTask>
 
