@@ -21,7 +21,8 @@
 			</docker>
 		</wrappers>
 		<executors>
-			<sge name="cluster_low" default="true" maxRunning="8" slots="1" memory="50000M" queue="hpclient.q" />
+			<sge name="cluster_low" default="true" maxRunning="8" slots="1" memory="80000M" />  <!--queue="dell.q"-->
+			<sge name="indexing" maxRunning="1" slots="1" memory="160000M" queue="dell256.q"/>
 			<!-- not working yet with this image (wrong shebang as no /bin/bash in image...) -->
 			<!-- <sge name="cluster_low_podman" default="true" maxRunning="8" slots="1" memory="2048M" queue="hpclient.q" container="docker" shebang="#!/usr/bin/env bash"/> -->	
 		</executors>
@@ -33,13 +34,11 @@
 	<!-- TODO: modify -->
 	<tasks mail="hadziahmetovic@cip.ifi.lmu.de">
 		<!-- simple test task -->
-		<scriptCallerTask id="1" name="generate_indices" notify="enabled">
+		<scriptCallerTask id="1" name="index" executor="indexing"> <!--notify="enabled"-->
 			<parameter>
-				<script>${BASE}/config/test_index.sh</script>
+				<script>${BASE}/config/run_index.sh</script>
 				<config>${BASE}/config/index.config</config>
-				<param>gtf:test.gtf</param>
-				<param>hisat2</param>
-				<param>star</param>
+					<param>index:/mnt/raidtmp/hadziahmetovic/indexTest</param>
 			</parameter>
 			<streams>
 				<stdout>${LOGDIR}/scriptCaller.out</stdout>
@@ -48,18 +47,20 @@
 		</scriptCallerTask>
 
 		<!-- task which generates sub-tasks for each entry in samples.csv -->
-		<scriptCallerTask id="2" name="mapping" processBlock="table">
+		<scriptCallerTask id="2" name="mapping_star" processBlock="table">
+			<dependencies>
+				<depends separate="true">1</depends>
+			</dependencies>
 			<parameter>
-				<script>${BASE}/test_data/testCommand.sh</script>
-				<param>mapWithSTAR</param>
-				<param>label:{$label}</param>
+				<script>${BASE}/config/run_mapping.sh</script>
 				<param>sample:{$label}</param>
-				<param>read1:{$fw}</param>
-				<param>read2:{$rw}</param>
+				<param>readFilesIn:{$fw} {$rw}</param>
+				<param>outFileNamePrefix:/home/data/out/STAR/{$label}</param>
+				<!--param>read2:{$rw}</param-->
 			</parameter>
 			<streams>
-				<stdout>${LOGDIR}/mapping.{$label}.out</stdout>
-				<stderr>${LOGDIR}/mapping.{$label}.err</stderr>
+				<stdout>${LOGDIR}/mapping_star.{$label}.out</stdout>
+				<stderr>${LOGDIR}/mapping_star.{$label}.err</stderr>
 			</streams>
 		</scriptCallerTask>
 
