@@ -5,6 +5,7 @@
 			<const name="WATCHDOG">/home/proj/software/watchdog</const>
 			<const name="BASE">/home/users/hadziahmetovic/testing/workflow_scripts/test/workflow_test</const>
 			<const name="INPUT_TABLE">${BASE}/sample.table</const>
+			<const name="EMPIRES_TABLE">${BASE}/empires.table</const>
 			<const name="OUT">${BASE}/OUT</const>
 			
 			<!-- must exist -->
@@ -23,12 +24,13 @@
 		<executors>
 			<sge name="cluster_low" default="true" maxRunning="8" slots="1" memory="80000M" />  <!--queue="dell.q"-->
 			<sge name="indexing" maxRunning="1" slots="1" memory="160000M" queue="dell256.q"/>
+			<sge name="emp" maxRunning="5" slots="1" memory="70000M"/>
 			<!-- not working yet with this image (wrong shebang as no /bin/bash in image...) -->
 			<!-- <sge name="cluster_low_podman" default="true" maxRunning="8" slots="1" memory="2048M" queue="hpclient.q" container="docker" shebang="#!/usr/bin/env bash"/> -->	
 		</executors>
 		<processBlock>
 			<processInput name="input_block" />
-			<processTable name="table" table="${INPUT_TABLE}" />
+			<processTable name="table" table="${INPUT_TABLE}"/>
 		</processBlock>
 	</settings>
 	<!-- TODO: modify -->
@@ -46,8 +48,21 @@
 			</streams>
 		</scriptCallerTask>
 
+		<scriptCallerTask id="2" name="convert" processBlock="table">
+			<parameter>
+				<script>${BASE}/test_data/testCommand.sh</script>
+				<param>convert</param>
+				<param>label:{$label}</param>
+				<param>sample:{$label}</param>
+			</parameter>
+			<streams>
+				<stdout>${LOGDIR}/convert.{$label}.out</stdout>
+				<stderr>${LOGDIR}/convert.{$label}.err</stderr>
+			</streams>
+		</scriptCallerTask>
+
 		<!-- task which generates sub-tasks for each entry in samples.csv -->
-		<scriptCallerTask id="2" name="mapping_star" processBlock="table">
+		<scriptCallerTask id="3" name="mapping_star" processBlock="table">
 			<dependencies>
 				<depends separate="true">1</depends>
 			</dependencies>
@@ -65,9 +80,9 @@
 		</scriptCallerTask>
 
 		<!-- task which generates sub-tasks for each entry in samples.csv -->
-		<scriptCallerTask id="3" name="convert" processBlock="table">
+		<scriptCallerTask id="4" name="convert" processBlock="table">
 			<dependencies>
-				<depends separate="true">2</depends>
+				<depends separate="true">3</depends>
 			</dependencies>
 			<parameter>
 				<script>${BASE}/test_data/testCommand.sh</script>
@@ -82,9 +97,9 @@
 		</scriptCallerTask>
 
 		<!-- task which generates sub-tasks for each entry in samples.csv -->
-		<scriptCallerTask id="4" name="countAndMerge">
+		<scriptCallerTask id="5" name="countAndMerge">
 			<dependencies>
-				<depends>3</depends>
+				<depends>4</depends>
 			</dependencies>
 			<parameter>
 				<script>${BASE}/test_data/testCommand.sh</script>
