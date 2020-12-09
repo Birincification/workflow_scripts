@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<watchdog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="watchdog.xsd" watchdogBase="/home/proj/software/watchdog/">
+	<settings>
+		<constants>
+			<const name="WATCHDOG">/home/proj/software/watchdog</const>
+			<const name="BASE">/home/users/hadziahmetovic/testing/workflow_scripts/test/workflow_test</const>
+			<const name="INPUT_TABLE">${BASE}/sample.table</const>
+			<const name="EMPIRES_TABLE">/mnt/raidtmp/hadziahmetovic/input/simulations.table</const>
+			<const name="OUT">${BASE}/OUT</const>
+			
+			<!-- must exist -->
+			<const name="LOGDIR">${OUT}/log</const>
+
+			<const name="DOCKER_BIN">/usr/bin/podman</const>
+		</constants>
+		<wrappers>
+			<docker name="docker" path2docker="${DOCKER_BIN}" image="bash:4.4" disableAutodetectMount="true">
+				<blacklist pattern="/tmp/" />
+				<mount><host>${WATCHDOG}/</host></mount>
+				<mount><host>${BASE}/</host></mount>
+				<mount><host>${LOGDIR}/</host></mount>
+			</docker>
+		</wrappers>
+		<executors>
+			<sge name="emp" maxRunning="8" slots="1" memory="60000M"/>
+			<!-- not working yet with this image (wrong shebang as no /bin/bash in image...) -->
+			<!-- <sge name="cluster_low_podman" default="true" maxRunning="8" slots="1" memory="2048M" queue="hpclient.q" container="docker" shebang="#!/usr/bin/env bash"/> -->	
+		</executors>
+		<processBlock>
+			<processInput name="input_block" />
+			<processTable name="table" table="${EMPIRES_TABLE}"/>
+		</processBlock>
+	</settings>
+	<!-- TODO: modify -->
+	<tasks mail="hadziahmetovic@cip.ifi.lmu.de">
+		<!-- simple test task -->
+		
+
+		<scriptCallerTask id="1" name="bandits" processBlock="table" executor="emp" notify="enabled">
+			<parameter>
+				<script>${BASE}/config/run_bandits.sh</script>
+				<param>index:{$index}</param>
+				<param>pdata:{$pdata}</param>
+				<param>outdir:{$out}</param>
+			</parameter>
+			<streams>
+				<stdout>${LOGDIR}/bandits.{$dir}.out</stdout>
+				<stderr>${LOGDIR}/bandits.{$dir}.err</stderr>
+			</streams>
+		</scriptCallerTask>
+	</tasks>
+</watchdog>
