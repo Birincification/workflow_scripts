@@ -24,7 +24,7 @@
 		<executors>
 			<sge name="cluster_low" default="true" maxRunning="8" slots="1" memory="80000M" />  <!--queue="dell.q"-->
 			<sge name="indexing" maxRunning="1" slots="1" memory="160000M" queue="dell256.q"/>
-			<sge name="emp" maxRunning="6" slots="1" memory="72000M"/>
+			<sge name="emp" maxRunning="8" slots="1" memory="72000M"/>
 			<!-- not working yet with this image (wrong shebang as no /bin/bash in image...) -->
 			<!-- <sge name="cluster_low_podman" default="true" maxRunning="8" slots="1" memory="2048M" queue="hpclient.q" container="docker" shebang="#!/usr/bin/env bash"/> -->	
 		</executors>
@@ -36,19 +36,9 @@
 	<!-- TODO: modify -->
 	<tasks mail="hadziahmetovic@cip.ifi.lmu.de">
 		<!-- simple test task -->
-		<scriptCallerTask id="1" name="index" executor="emp"> <!--notify="enabled"-->
-			<parameter>
-				<script>${BASE}/config/run_index.sh</script>
-				<config>${BASE}/config/index.config</config>
-					<param>index:/mnt/raidtmp/hadziahmetovic/indexTest</param>
-			</parameter>
-			<streams>
-				<stdout>${LOGDIR}/scriptCaller.out</stdout>
-				<stderr>${LOGDIR}/scriptCaller.err</stderr>
-			</streams>
-		</scriptCallerTask>
+		
 
-		<scriptCallerTask id="2" name="empires" processBlock="table" executor="emp" notify="enabled">
+		<scriptCallerTask id="1" name="empires" processBlock="table" executor="emp" notify="enabled">
 			<parameter>
 				<script>${BASE}/config/run_empires_ecc.sh</script>
 				<param>index:{$index}</param>
@@ -59,6 +49,19 @@
 			<streams>
 				<stdout>${LOGDIR}/empires.{$dir}.out</stdout>
 				<stderr>${LOGDIR}/empires.{$dir}.err</stderr>
+			</streams>
+		</scriptCallerTask>
+
+
+		<scriptCallerTask id="2" name="index" executor="emp"> <!--notify="enabled"-->
+			<parameter>
+				<script>${BASE}/config/run_index.sh</script>
+				<config>${BASE}/config/index.config</config>
+					<param>index:/mnt/raidtmp/hadziahmetovic/indexTest</param>
+			</parameter>
+			<streams>
+				<stdout>${LOGDIR}/scriptCaller.out</stdout>
+				<stderr>${LOGDIR}/scriptCaller.err</stderr>
 			</streams>
 		</scriptCallerTask>
 	</tasks>

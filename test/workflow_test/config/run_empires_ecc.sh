@@ -37,7 +37,7 @@ fi
 # read getopt’s output this way to handle the quoting right:
 eval set -- "$PARSED"
 
-pdata=- sampledir=- index=-
+pdata=- sampledir=- index=- outdir=-
 strand=
 # now enjoy the options in order and nicely split until we see --
 while true; do
@@ -83,5 +83,5 @@ if [[ $# -ne 0 ]]; then
 fi
 
 ## Run indices
-podman run --pull=always -v $index:/home/data/indices -v $outdir:/home/data/out -v $pdata:$pdata -v $sampledir:$sampledir --rm -it hadziahmetovic/empires:latest /home/scripts/empire_ecc_mapping.sh $pdata $sampledir $strand
+podman run -v $index:/home/data/indices -v $outdir:/home/data/out -v $pdata:$pdata -v $sampledir:$sampledir --rm -it hadziahmetovic/empires:latest /home/scripts/empire_ecc_mapping.sh $pdata $sampledir $strand
 
