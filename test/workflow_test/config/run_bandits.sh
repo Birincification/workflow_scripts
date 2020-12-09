@@ -68,5 +68,5 @@ outfile="/home/data/out/diff_splicing_outs/BANDITS"
 rindex="/home/data/indices/R/tx2gene.RData"
 
 ## Run indices
-podman run -v $index:/home/data/indices -v $outdir:/home/data/out -v $pdata:$pdata --rm -it hadziahmetovic/bandits:latest /home/scripts/bandits_call_salmon.R --tx2gene $rindex --pdata $pdata --basedir $sampledir --outfile $outfile --ncores
+podman run -v $index:/home/data/indices -v $outdir:/home/data/out -v $pdata:$pdata --rm -it hadziahmetovic/bandits:latest /home/scripts/bandits_call_salmon.R --tx2gene $rindex --pdata $pdata --basedir $sampledir --outfile $outfile
 
