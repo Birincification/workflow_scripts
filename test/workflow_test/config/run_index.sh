@@ -22,7 +22,7 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
 fi
 
 OPTIONS=
-LONGOPTS=gtf:,fasta:,organism:,taxid:,nthread:,empires,hisat2,star,r,kallisto,salmon,dexseq,index:
+LONGOPTS=gtf:,fasta:,organism:,taxid:,nthread:,empires,hisat2,star,r,kallisto,salmon,dexseq,index:,all
 
 # -regarding ! and PIPESTATUS see above
 # -temporarily store output to be able to check for errors
@@ -38,7 +38,7 @@ fi
 eval set -- "$PARSED"
 
 gtf=- fasta=- index=-
-empires=n
+empires=n all=n
 # now enjoy the options in order and nicely split until we see --
 while true; do
     case "$1" in
@@ -52,6 +52,10 @@ while true; do
             ;;
         --empires)
         empires=y
+            shift
+            ;;
+		--all)
+        all=y
             shift
             ;;
 		--index)
@@ -75,8 +79,9 @@ if [[ $# -ne 0 ]]; then
 fi
 
 ## Run indices
-podman run --pull=always -v $index:/home/data/indices -v $gtf:$gtf -v $fasta:$fasta --rm hadziahmetovic/generate-indices:latest /home/scripts/generate_indices.sh ${params[@]}
-
+if [[ "$all" = "y" ]]; then
+	podman run --pull=always -v $index:/home/data/indices -v $gtf:$gtf -v $fasta:$fasta --rm hadziahmetovic/generate-indices:latest /home/scripts/generate_indices.sh ${params[@]}
+fi
 
 if [[ "$empires" = "y" ]]; then
     ## echo "empires call here ... $gtf $fasta"
