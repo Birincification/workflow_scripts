@@ -83,5 +83,5 @@ if [[ $# -ne 0 ]]; then
 fi
 
 ## Run indices
-podman run -v $index:/home/data/indices -v $outdir:/home/data/out -v $pdata:$pdata -v $sampledir:$sampledir --rm -dit hadziahmetovic/empires:latest /home/scripts/empire_ecc_mapping.sh $pdata $sampledir $strand
+podman run -v $index:/home/data/indices -v $outdir:/home/data/out -v $pdata:$pdata -v $sampledir:$sampledir --rm -it hadziahmetovic/empires:latest /home/scripts/empire_ecc_mapping.sh $pdata $sampledir $strand
 
